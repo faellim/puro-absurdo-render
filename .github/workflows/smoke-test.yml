@@ -1,0 +1,41 @@
+name: Puro Absurdo - Teste rapido do renderizador
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Instalar dependencias
+        run: |
+          set -euo pipefail
+          npm install --prefix studio3d --no-audit --no-fund
+          (cd studio3d && npx remotion browser ensure)
+      - name: Validar projeto, roteiro e composicoes
+        run: |
+          set -euo pipefail
+          node studio3d/scripts/validate.mjs emu-1932
+          node studio3d/scripts/check-contract.mjs emu-1932
+          (cd studio3d && npx tsc --noEmit)
+          (cd studio3d && npx remotion compositions src/index.tsx)
+      - name: Renderizar quadro inicial para teste
+        run: |
+          set -euo pipefail
+          mkdir -p out/studio3d/smoke
+          (cd studio3d && npx remotion still src/index.tsx EmuWar1932 ../out/studio3d/smoke/frame-0.png --frame=0 --scale=0.5)
+          test -s out/studio3d/smoke/frame-0.png
+      - name: Publicar imagem de validacao
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-frame-0
+          path: out/studio3d/smoke/frame-0.png
+          if-no-files-found: error
+          retention-days: 3
