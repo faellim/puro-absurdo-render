@@ -1,0 +1,286 @@
+name: Puro Absurdo - Render 2K (publico)
+on:
+  workflow_dispatch:
+    inputs:
+      quality:
+        description: "draft 540x960 / fullhd 1080x1920 / final2k 1440x2560"
+        type: choice
+        options: [draft, fullhd, final2k]
+        default: final2k
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-render-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  voice-and-review:
+    name: Voz, historia, imagem e mixagem
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar dependencias
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python -m pip install --disable-pip-version-check edge-tts gTTS faster-whisper numpy pillow
+          npm install --prefix studio3d --no-audit --no-fund
+          (cd studio3d && npx remotion browser ensure)
+      - name: Preparar roteiro com duracao realmente narrada
+        run: |
+          set -euo pipefail
+          node studio3d/scripts/validate.mjs emu-1932
+          node studio3d/scripts/check-contract.mjs emu-1932
+          python studio3d/audio/voice.py emu-1932
+          node studio3d/scripts/validate.mjs emu-1932 --generated
+          python studio3d/scripts/word-review.py emu-1932
+          python studio3d/scripts/acting-audit.py emu-1932
+          python studio3d/audio/build.py emu-1932
+          ffmpeg -v error -i studio3d/out/emu-1932/mix.wav -f null -
+      - name: Garantir compilacao e duracao da composicao
+        run: |
+          set -euo pipefail
+          (cd studio3d && npx tsc --noEmit)
+          (cd studio3d && npx remotion compositions src/index.tsx)
+          node studio3d/scripts/render-plan.mjs emu-1932 0 16
+      - name: Gerar stills para inspecao do elenco e dos cenarios
+        run: |
+          set -euo pipefail
+          mkdir -p out/studio3d/qa
+          FRAMES=$(node -e "const t=require('./studio3d/episodes/emu-1932/timing.json');console.log([0,1,2,3,4,5,6,7,8,9,10,11,12].map(i=>Math.floor((t.shots[i].start+t.shots[i].end)/2)).join(' '));")
+          cd studio3d
+          for f in $FRAMES; do
+            npx remotion still src/index.tsx EmuWar1932 "../out/studio3d/qa/frame-$f.jpg" --frame="$f" --scale=0.5
+          done
+      - name: Medir cor, contraste e detalhes nos 13 quadros
+        run: |
+          set -euo pipefail
+          python studio3d/scripts/look-metrics.py out/studio3d/qa out/studio3d/qa/look-metrics.json
+      - name: Auditar cor, enquadramento e estilo contra as metas documentadas
+        run: |
+          set -euo pipefail
+          python studio3d/scripts/reference-qa.py out/studio3d/qa/look-metrics.json out/studio3d/qa/reference-qa.json
+      - name: Gerar preview cinematografico de 24 quadros
+        run: |
+          set -euo pipefail
+          cd studio3d
+          npx remotion render src/index.tsx EmuWar1932 ../out/studio3d/qa/preview-24f.mp4 \
+            --frames=0-23 --scale=0.5 --codec=h264 --crf=22 --concurrency=1
+          ffmpeg -v error -i ../out/studio3d/qa/preview-24f.mp4 -f null -
+      - name: Publicar QA visual antes de usar render pesado
+        uses: actions/upload-artifact@v4
+        with:
+          name: emu-reference-qa-stills-preview
+          path: |
+            out/studio3d/qa/
+            studio3d/out/emu-1932/alignment_review.json
+            studio3d/out/emu-1932/acting_audit.json
+            studio3d/out/emu-1932/acting_audit.md
+            studio3d/out/emu-1932/words.json
+            studio3d/out/emu-1932/audio_report.json
+            studio3d/out/emu-1932/alignment_review.json
+            studio3d/out/emu-1932/cues.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Compartilhar a timeline e o audio exato com todos os segmentos
+        uses: actions/upload-artifact@v4
+        with:
+          name: emu-reference-qa-voice-lock
+          path: |
+            studio3d/episodes/emu-1932/timing.json
+            studio3d/out/emu-1932/voice.wav
+            studio3d/out/emu-1932/mix.wav
+            studio3d/out/emu-1932/words.json
+            studio3d/out/emu-1932/audio_report.json
+            studio3d/out/emu-1932/cues.json
+          if-no-files-found: error
+          retention-days: 7
+
+  render-chunks:
+    name: Render final do trecho ${{ matrix.part }}
+    needs: voice-and-review
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        part: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Instalar Remotion, Three.js e Chrome
+        run: |
+          set -euo pipefail
+          npm install --prefix studio3d --no-audit --no-fund
+          (cd studio3d && npx remotion browser ensure)
+      - name: Restaurar arquivo de narração que definiu todos os cortes
+        uses: actions/download-artifact@v4
+        with:
+          name: emu-reference-qa-voice-lock
+          path: studio3d
+      - name: Calcular limites sem duplicar ou perder quadros
+        id: range
+        run: node studio3d/scripts/render-plan.mjs emu-1932 ${{ matrix.part }} 16
+      - name: Renderizar parte com efeitos cinematograficos
+        run: |
+          set -euo pipefail
+          mkdir -p out/studio3d/chunks
+          SCALE=1.3333333333333333
+          PROPS='{"renderer":{"dpr":1.3333333333333333}}'
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "${{ inputs.quality }}" = "draft" ]; then
+              SCALE=0.5
+              PROPS='{"renderer":{"dpr":0.5}}'
+            elif [ "${{ inputs.quality }}" = "fullhd" ]; then
+              SCALE=1
+              PROPS='{"renderer":{"dpr":1}}'
+            elif [ "${{ inputs.quality }}" = "final2k" ]; then
+              SCALE=1.3333
+              PROPS='{"renderer":{"dpr":1.3333333333333333}}'
+            fi
+          fi
+          (cd studio3d && npx remotion render src/index.tsx EmuWar1932 \
+            ../out/studio3d/chunks/part-${{ steps.range.outputs.part }}.mp4 \
+            --frames="${{ steps.range.outputs.begin }}-${{ steps.range.outputs.end }}" --scale="$SCALE" \
+            --props="$PROPS" --codec=h264 --crf=17 --concurrency=1)
+      - name: Guardar trecho para montagem segura
+        uses: actions/upload-artifact@v4
+        with:
+          name: emu-reference-qa-part-${{ steps.range.outputs.part }}
+          path: out/studio3d/chunks/part-${{ steps.range.outputs.part }}.mp4
+          if-no-files-found: error
+          retention-days: 7
+
+  final-assembly-and-qa:
+    name: MP4 final e verificacao cinematografica
+    needs: [voice-and-review,render-chunks]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar FFmpeg e QA
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python -m pip install --disable-pip-version-check numpy pillow
+      - name: Restaurar a timeline e a mixagem originais
+        uses: actions/download-artifact@v4
+        with:
+          name: emu-reference-qa-voice-lock
+          path: studio3d
+      - name: Restaurar medições e revisão de atuação do primeiro job
+        uses: actions/download-artifact@v4
+        with:
+          name: emu-reference-qa-stills-preview
+          path: .
+      - name: Restaurar todos os 16 segmentos
+        uses: actions/download-artifact@v4
+        with:
+          pattern: emu-reference-qa-part-*
+          path: out/studio3d/chunks
+          merge-multiple: true
+      - name: Verificar que os fragmentos cobrem todos os quadros
+        run: |
+          set -euo pipefail
+          node studio3d/scripts/concat-plan.mjs emu-1932 out/studio3d/chunks 16
+          ffmpeg -hide_banner -loglevel warning -y \
+            -f concat -safe 0 -i out/studio3d/chunks/concat.txt \
+            -c:v copy -movflags +faststart out/studio3d/emu-1932-silent.mp4
+      - name: Masterizar a narracao, musica e efeitos em AAC
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -loglevel warning -y \
+            -i out/studio3d/emu-1932-silent.mp4 -i studio3d/out/emu-1932/mix.wav \
+            -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -b:a 192k -ar 48000 \
+            -af "loudnorm=I=-15:TP=-1.5:LRA=7" -movflags +faststart \
+            -shortest out/studio3d/emu-1932-narrado.mp4
+      - name: Verificar que audio, quadros e duracao batem com o roteiro
+        run: |
+          set -euo pipefail
+          ffmpeg -v error -i out/studio3d/emu-1932-narrado.mp4 -f null -
+          ffprobe -v error -show_entries format=duration:stream=codec_type,nb_frames,r_frame_rate,width,height,sample_rate \
+            -of json out/studio3d/emu-1932-narrado.mp4 > out/studio3d/ffprobe.json
+          python - <<'PY'
+          import json
+          t=json.load(open('studio3d/episodes/emu-1932/timing.json'))
+          q=json.load(open('out/studio3d/ffprobe.json'))
+          v=next(s for s in q['streams'] if s['codec_type']=='video')
+          a=next(s for s in q['streams'] if s['codec_type']=='audio')
+          assert v['r_frame_rate']=='30/1',(v['r_frame_rate'],t['frames'])
+          assert int(v['nb_frames'])==t['frames'],(v['nb_frames'],t['frames'])
+          assert int(a['sample_rate'])==48000
+          assert abs(float(q['format']['duration'])-t['frames']/30)<.4
+          width,height=int(v['width']),int(v['height'])
+          assert (width,height) in ((540,960),(1080,1920),(1440,2560)),(width,height)
+          import os
+          if os.environ.get('GITHUB_EVENT_NAME')=='push':
+              assert (width,height)==(1440,2560),('Push must produce final2k',width,height)
+          print('VERIFIED',v['width'],v['height'],v['nb_frames'],'frames')
+          PY
+      - name: Analisar movimentos, quadros pretos, cortes e loudness
+        run: |
+          set -euo pipefail
+          node studio3d/scripts/qa-shots.mjs emu-1932 out/studio3d/emu-shots.json
+          python studio3d/reference/scripts/short_qa.py \
+            out/studio3d/emu-1932-narrado.mp4 out/studio3d/qa-full out/studio3d/emu-shots.json
+          python studio3d/scripts/qa-verdict.py \
+            out/studio3d/qa-full/report.md out/studio3d/qa-full/verdict.json
+      - name: Auditar continuidade, transicoes e movimentos do video inteiro
+        run: |
+          set -euo pipefail
+          python studio3d/scripts/motion-audit.py out/studio3d/emu-1932-narrado.mp4 \
+            studio3d/episodes/emu-1932/timing.json out/studio3d/qa-full/motion-audit.json
+      - name: Verificar integridade do pacote de evidencias
+        run: |
+          set -euo pipefail
+          for f in out/studio3d/qa/look-metrics.json out/studio3d/qa/reference-qa.json \
+            out/studio3d/qa-full/motion-audit.json \
+            studio3d/out/emu-1932/acting_audit.json \
+            studio3d/out/emu-1932/alignment_review.json; do
+            test -s "$f" || { echo "Evidencia ausente: $f"; exit 1; }
+          done
+      - name: Entregar MP4 e auditoria da producao
+        uses: actions/upload-artifact@v4
+        with:
+          name: emu-reference-qa-video-completo-auditado
+          path: |
+            out/studio3d/emu-1932-narrado.mp4
+            out/studio3d/ffprobe.json
+            out/studio3d/emu-shots.json
+            out/studio3d/qa-full/report.md
+            out/studio3d/qa-full/verdict.json
+            out/studio3d/qa/look-metrics.json
+            out/studio3d/qa/look-metrics.md
+            out/studio3d/qa/reference-qa.json
+            out/studio3d/qa/reference-qa.md
+            out/studio3d/qa-full/motion-audit.json
+            studio3d/out/emu-1932/acting_audit.json
+            studio3d/out/emu-1932/acting_audit.md
+            studio3d/out/emu-1932/alignment_review.json
+            out/studio3d/qa-full/sheet_*.jpg
+            studio3d/episodes/emu-1932/timing.json
+            studio3d/out/emu-1932/words.json
+            studio3d/out/emu-1932/audio_report.json
+          if-no-files-found: error
+          retention-days: 7
