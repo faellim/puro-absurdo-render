@@ -1,0 +1,110 @@
+{
+  "id": "emu-1932",
+  "title": "A Guerra que a Austrália Travou Contra os Emus",
+  "language": "pt-BR",
+  "voice": "pt-BR-AntonioNeural",
+  "fps": 30,
+  "output": {
+    "width": 1080,
+    "height": 1920
+  },
+  "shots": [
+    {
+      "id": "hook",
+      "text": "Em mil novecentos e trinta e dois, a Austrália enviou soldados com metralhadoras para enfrentar aves gigantes. E tudo deu errado.",
+      "scene": "close",
+      "seconds": 4.7,
+      "light": "day"
+    },
+    {
+      "id": "setting",
+      "text": "No oeste australiano, milhares de emus, pássaros incapazes de voar, atravessavam fazendas e devoravam plantações de trigo.",
+      "scene": "wide",
+      "seconds": 4.7,
+      "light": "day"
+    },
+    {
+      "id": "farmers",
+      "text": "Agricultores desesperados pediram ajuda. O governo enviou militares com duas metralhadoras Lewis. Parecia uma missão simples.",
+      "scene": "council",
+      "seconds": 4.5,
+      "light": "day"
+    },
+    {
+      "id": "plan",
+      "text": "O plano? Esperar um grande bando perto da água, apontar as armas e encerrar o problema rapidamente.",
+      "scene": "setup",
+      "seconds": 3.8,
+      "light": "day"
+    },
+    {
+      "id": "scatter",
+      "text": "Mas os emus tinham outro plano: se espalhar em pequenos grupos e correr mais rápido que qualquer soldado.",
+      "scene": "chaos",
+      "seconds": 4.5,
+      "light": "day"
+    },
+    {
+      "id": "ambush",
+      "text": "Numa emboscada junto ao reservatório, centenas de aves apareceram. Finalmente, os soldados achavam que conseguiriam cercá-las.",
+      "scene": "water",
+      "seconds": 4.5,
+      "light": "day"
+    },
+    {
+      "id": "jam",
+      "text": "Só que uma metralhadora emperrou no momento decisivo. O bando disparou campo afora, deixando os soldados olhando.",
+      "scene": "jam",
+      "seconds": 3.8,
+      "light": "day"
+    },
+    {
+      "id": "truck",
+      "text": "Então inventaram uma perseguição: montaram a arma num caminhão e partiram atrás dos emus. Ideia genial, aparentemente.",
+      "scene": "chase",
+      "seconds": 4.3,
+      "light": "day"
+    },
+    {
+      "id": "bumps",
+      "text": "O chão sacudia tanto o caminhão que mal conseguiam mirar. E os emus corriam como se estivessem treinando.",
+      "scene": "bumps",
+      "seconds": 4.5,
+      "light": "day"
+    },
+    {
+      "id": "zigzag",
+      "text": "Eles ziguezagueavam, mudavam de direção e desapareciam pelas colinas. Para os soldados, era impossível reunir os bichos num alvo.",
+      "scene": "zigzag",
+      "seconds": 4.7,
+      "light": "day"
+    },
+    {
+      "id": "press",
+      "text": "A imprensa começou a zombar da campanha. Afinal, eram soldados experientes tentando capturar adversários que sequer usavam uniforme.",
+      "scene": "press",
+      "seconds": 4.6,
+      "light": "golden"
+    },
+    {
+      "id": "result",
+      "text": "Algumas aves morreram, mas o problema dos agricultores continuou. A operação militar não conseguiu controlar a população de emus.",
+      "scene": "aftermath",
+      "seconds": 4.7,
+      "light": "golden"
+    },
+    {
+      "id": "ending",
+      "text": "Assim ficou conhecida a Guerra dos Emus: o episódio em que a Austrália descobriu que metralhadoras não resolvem tudo.",
+      "scene": "final",
+      "seconds": 5,
+      "light": "golden"
+    }
+  ],
+  "notes": {
+    "violence": "Sem representar ferimentos, sangue ou mortes visualmente.",
+    "portrayal": "Emus não são soldados; metáforas visuais de guerra são humor editorial.",
+    "pacing": "Voice is measured from final tempo-adjusted PCM; words align to audio after speed-up.",
+    "historical_accuracy": "No claim of a formally declared war or animal victory as battlefield event."
+  }
+}
