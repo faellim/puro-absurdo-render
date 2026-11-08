@@ -1,0 +1,31 @@
+{
+  "name": "puro-absurdo-studio-3d",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "compositions": "remotion compositions src/index.tsx",
+    "render:pilot": "remotion render src/index.tsx PuroAbsurdo3DPilot ../out/studio3d/pilot.mp4 --codec h264 --crf 20 --concurrency 1",
+    "render:still": "remotion still src/index.tsx PuroAbsurdo3DPilot ../out/studio3d/still.jpg --frame=85 --scale=0.5",
+    "render:emu:preview": "remotion render src/index.tsx EmuWar1932 ../out/studio3d/emu-preview.mp4 --frames=0-119 --scale=0.5 --concurrency=1",
+    "render:emu:full": "remotion render src/index.tsx EmuWar1932 ../out/studio3d/emu-silent.mp4 --scale=0.5 --concurrency=1"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.541",
+    "@remotion/three": "4.0.541",
+    "remotion": "4.0.541",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "three": "0.175.0",
+    "@react-three/fiber": "9.1.2",
+    "@react-three/postprocessing": "3.0.4",
+    "postprocessing": "6.37.2"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@types/three": "0.175.0",
+    "typescript": "5.9.3",
+    "@types/node": "^22.15.0"
+  }
+}
