@@ -1,0 +1,132 @@
+{
+  "hook": [
+    {
+      "terms": [
+        "soldados",
+        "metralhadoras"
+      ],
+      "fallback": 0.52,
+      "action": "shock"
+    }
+  ],
+  "farmers": [
+    {
+      "terms": [
+        "desesperados"
+      ],
+      "fallback": 0.22,
+      "action": "nervous"
+    },
+    {
+      "terms": [
+        "governo",
+        "militares"
+      ],
+      "fallback": 0.63,
+      "action": "point"
+    }
+  ],
+  "plan": [
+    {
+      "terms": [
+        "plano",
+        "esperar"
+      ],
+      "fallback": 0.12,
+      "action": "point"
+    },
+    {
+      "terms": [
+        "rapidamente"
+      ],
+      "fallback": 0.77,
+      "action": "grin"
+    }
+  ],
+  "scatter": [
+    {
+      "terms": [
+        "espalhar",
+        "grupos"
+      ],
+      "fallback": 0.38,
+      "action": "scatter"
+    }
+  ],
+  "ambush": [
+    {
+      "terms": [
+        "emboscada",
+        "centenas"
+      ],
+      "fallback": 0.42,
+      "action": "surprised"
+    }
+  ],
+  "jam": [
+    {
+      "terms": [
+        "emperrou"
+      ],
+      "fallback": 0.35,
+      "action": "shock"
+    },
+    {
+      "terms": [
+        "olhando"
+      ],
+      "fallback": 0.76,
+      "action": "dazed"
+    }
+  ],
+  "truck": [
+    {
+      "terms": [
+        "caminhão",
+        "perseguir"
+      ],
+      "fallback": 0.28,
+      "action": "drive"
+    }
+  ],
+  "bumps": [
+    {
+      "terms": [
+        "sacudia",
+        "solavancos"
+      ],
+      "fallback": 0.45,
+      "action": "dazed"
+    }
+  ],
+  "zigzag": [
+    {
+      "terms": [
+        "ziguezague",
+        "correndo"
+      ],
+      "fallback": 0.5,
+      "action": "scatter"
+    }
+  ],
+  "press": [
+    {
+      "terms": [
+        "imprensa",
+        "zombar"
+      ],
+      "fallback": 0.42,
+      "action": "nervous"
+    }
+  ],
+  "ending": [
+    {
+      "terms": [
+        "metralhadoras",
+        "resolvem"
+      ],
+      "fallback": 0.78,
+      "action": "grin"
+    }
+  ]
+}
