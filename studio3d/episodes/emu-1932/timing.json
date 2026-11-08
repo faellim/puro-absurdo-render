@@ -1,0 +1,72 @@
+{
+  "fps": 30,
+  "frames": 1749,
+  "shots": [
+    {
+      "id": "hook",
+      "start": 0,
+      "end": 141
+    },
+    {
+      "id": "setting",
+      "start": 141,
+      "end": 282
+    },
+    {
+      "id": "farmers",
+      "start": 282,
+      "end": 417
+    },
+    {
+      "id": "plan",
+      "start": 417,
+      "end": 531
+    },
+    {
+      "id": "scatter",
+      "start": 531,
+      "end": 666
+    },
+    {
+      "id": "ambush",
+      "start": 666,
+      "end": 801
+    },
+    {
+      "id": "jam",
+      "start": 801,
+      "end": 915
+    },
+    {
+      "id": "truck",
+      "start": 915,
+      "end": 1044
+    },
+    {
+      "id": "bumps",
+      "start": 1044,
+      "end": 1179
+    },
+    {
+      "id": "zigzag",
+      "start": 1179,
+      "end": 1320
+    },
+    {
+      "id": "press",
+      "start": 1320,
+      "end": 1458
+    },
+    {
+      "id": "result",
+      "start": 1458,
+      "end": 1599
+    },
+    {
+      "id": "ending",
+      "start": 1599,
+      "end": 1749
+    }
+  ],
+  "words": []
+}
