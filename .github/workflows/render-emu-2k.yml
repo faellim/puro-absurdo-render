@@ -1,5 +1,9 @@
 name: Puro Absurdo - Render 2K (publico)
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/render-requests/emu-1932.txt'
   workflow_dispatch:
     inputs:
       quality:
