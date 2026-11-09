@@ -18,7 +18,9 @@ if(CUTS.some((x,i)=>x.b<=x.a || (i>0&&x.a!==CUTS[i-1].b)) ||
   throw new Error("Narrated scene timeline is discontinuous");
 
 export const DURATION = timing.frames;
-export const words = timing.words;
+export type SpokenWord = {text:string;shot:string;alignment?:string;s:number;e:number;frame:number};
+// Empty JSON word arrays infer never[] in TypeScript. Narration populates this at render time.
+export const words: SpokenWord[] = timing.words;
 
 export const clamp=(x:number)=>Math.max(0,Math.min(1,x));
 export const smooth=(v:number)=>{const x=clamp(v);return x*x*(3-2*x)};
