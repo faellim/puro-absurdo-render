@@ -149,7 +149,7 @@ jobs:
               SCALE=1
               PROPS='{"renderer":{"dpr":1}}'
             elif [ "${{ inputs.quality }}" = "final2k" ]; then
-              SCALE=1.3333
+              SCALE=1.3333333333333333
               PROPS='{"renderer":{"dpr":1.3333333333333333}}'
             fi
           fi
