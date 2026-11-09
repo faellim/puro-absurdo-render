@@ -1,6 +1,11 @@
 name: Puro Absurdo - Teste rapido do renderizador
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'studio3d/**'
+      - '.github/workflows/smoke-test.yml'
 
 permissions:
   contents: read
