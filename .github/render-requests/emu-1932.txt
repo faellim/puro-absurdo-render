@@ -1,0 +1,7 @@
+# Render request: EmuWar1932
+
+Reason: full 2K acceptance after TypeScript and integer scale corrections.
+
+Target: 1440x2560; 30 fps; 16 chunks; voice-first; full visual/audio QA.
+
+The presence of this commit triggers GitHub Actions via a restricted `push` path. Update this file with a new commit to re-render; no secrets are required.
